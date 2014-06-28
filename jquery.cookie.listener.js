@@ -9,18 +9,18 @@
 	}
 
 	/* var */ $cookie = $.cookie, //store original cookie
-		refresh_interval = 100, //to refresh every 100 ms
+		refresh_interval = 1000, //to refresh every 100 ms
 		callback_store = {},
 		cookie_vals = {};
 	
 	CookieStorage = $.cookie = function() {
 		var args = Array.prototype.slice.call(arguments);
 
-		console.log('args: ', args);
+		//console.log('args: ', args);
 
 		if(args.length >= 2) {
 			//the setter case
-			console.log('set cookie');
+			//console.log('set cookie');
 			var cookie_name = args[0],
 				old_val = $cookie.call($, cookie_name),
 				new_val = args[1];
@@ -54,7 +54,7 @@
 		});
 
 		//store cookie val
-		(cookie_name in cookie_vals)  && (cookie_vals[cookie_name] = $cookie.call($, cookie_name));
+		cookie_vals[cookie_name] = $cookie.call($, cookie_name);
 	}
 
 	CookieStorage.off = function(event_name, callback, context) {
@@ -68,17 +68,23 @@
 	/* intern functions */
 	function check_cookie() {
 		console.log('check cookie');
-		console.log('cookie vals: ', cookie_vals);
-		$(cookie_vals).each(function(cookie_name, old_val) {
-			var new_val = $cookie.call($, cookie_name);
+		var cookie_name, old_val, new_val;
+		for(cookie_name in cookie_vals) {
+			old_val = cookie_vals[cookie_name];
+			new_val = $cookie.call($, cookie_name);
+			console.log('cookie name: ', cookie_name);
+			console.log('new val: ', new_val);
+			console.log('old val: ', old_val);
 			old_val != new_val && change_trigger(cookie_name, old_val, new_val);
-		});
+		};
 	}
 
 	setInterval(check_cookie, refresh_interval);
 
 	function change_trigger(cookie_name, old_val, new_val) {
-			console.log('change trigger');
+			//console.log('change trigger');
+			cookie_vals[cookie_name] = new_val;
+
 			var eve = {
 				type: change_event,
 				cookie: {
