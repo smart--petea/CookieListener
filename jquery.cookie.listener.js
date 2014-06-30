@@ -30,22 +30,12 @@
 
 	$.extend(CookieStorage, $cookie);
 
-	function trigger(cookie_name, event_name, event_obj) {
-		if( ! (callback_store[cookie_name] && callback_store[cookie_name][event_name] instanceof Array) ) {
-			return;
-		};  
-		
-		$(callback_store[cookie_name][event_name]).each(function(_, record) {
-			record.callback.call(record.context, event_obj);
-		});
-	}
 
-	function on(cookie_name, event_name, callback, context) {
+	CookieStorage.onchange = function (cookie_name, callback, context) {
 		//todo: verify params
-		var cookie_callbacks = callback_store[cookie_name] = callback_store[cookie_name] || {};
-		var event_callbacks = callback_store[cookie_name][event_name] = callback_store[cookie_name][event_name] || [];
+		var cookie_callbacks = callback_store[cookie_name] = callback_store[cookie_name] || [];
 
-		event_callbacks.push({
+		cookie_callbacks.push({
 			callback: callback,
 			context: context || null,
 		});
@@ -54,13 +44,6 @@
 		cookie_vals[cookie_name] = $cookie.call($, cookie_name);
 	}
 
-	CookieStorage.off = function(event_name, callback, context) {
-		//todo: must be implemented
-		throw new Error('Not implemented');
-	}
-
-	/* events name */
-	var change_event = "change";
 
 	/* intern functions */
 	function check_cookie() {
@@ -75,23 +58,26 @@
 	setInterval(check_cookie, refresh_interval);
 
 	function change_trigger(cookie_name, old_val, new_val) {
-			cookie_vals[cookie_name] = new_val;
+		if( ! (callback_store[cookie_name] instanceof Array) ) {
+			return;
+		};  
 
-			var eve = {
-				type: change_event,
-				cookie: {
-					name: cookie_name,
-					old : old_val,
-					new : new_val,
-				},
-			};
+		cookie_vals[cookie_name] = new_val;
 
-			trigger(cookie_name, change_event, eve);
+		var eve = {
+			name: cookie_name,
+			old : old_val,
+			new : new_val,
+		};
+
+		
+		$(callback_store[cookie_name]).each(function(_, record) {
+			record.callback.call(record.context, eve);
+		});
 	}
 
-	//official functions
-	CookieStorage.onchange = function(cookie_name, callback, context) {
-		on(cookie_name, change_event, callback, context); 
+	CookieStorage.offchange = function(cookie_name, callback, context) {
+		throw new Error('not implemented');	
 	}
 
 })(jQuery)
