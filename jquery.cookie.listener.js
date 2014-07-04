@@ -8,7 +8,7 @@
 	}
 
 	/* var */ $cookie = $.cookie, //store original cookie
-		refresh_interval = 1000, //to refresh every 100 ms
+		refresh_interval = 100, //to refresh every 100 ms
 		change_callbacks = {},
 		change_vals = {};
 	
@@ -98,6 +98,10 @@
 				callbacks.splice(i, 1);
 			}
 		}
+	}
+
+	CookieStorage.setInterval = function(interval) {
+		refresh_interval = interval;
 	}
 
 })(jQuery)
